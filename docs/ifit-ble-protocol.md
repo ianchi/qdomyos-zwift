@@ -96,6 +96,29 @@ use the stop-specific reply in "ans 12".
   Peloton-style conversion).
   【F:src/virtualdevices/virtualbike.cpp†L874-L887】
 
+## iFit Treadmills
+
+The treadmill integrations in this repo are not BLE-based. Two main paths exist:
+
+- **ProForm WiFi treadmills** use a WebSocket control channel. The code connects
+  to `ws://<ip>/control`, sends JSON `set` commands for speed and incline, and
+  parses incoming JSON metrics (for example, `Current KPH`, `Incline`).
+  【F:src/devices/proformwifitreadmill/proformwifitreadmill.cpp†L76-L206】
+- **NordicTrack iFit ADB treadmills** use UDP telemetry plus optional ADB
+  remote control. Metrics are parsed from UDP text lines (for example, `Changed
+  KPH`, `Changed Grade`), while speed and incline commands are sent either as
+  UDP commands or as ADB swipe gestures.
+  【F:src/devices/nordictrackifitadbtreadmill/nordictrackifitadbtreadmill.cpp†L209-L408】
+
+## NordicTrack Model Differences
+
+Different NordicTrack treadmill models use different control mappings and
+coordinate lookups. The ADB path includes per-model constants and lookup
+tables for speed and incline gestures (for example, X22i, T8.5s, X14i, 1750).
+These model-specific branches select different screen coordinates and, for
+some models, lookup-table conversions instead of simple linear math.
+【F:src/devices/nordictrackifitadbtreadmill/nordictrackifitadbtreadmill.cpp†L290-L520】
+
 ## Practical Implications
 
 - If you are integrating a new NordicTrack/ProForm model, start by cloning an
